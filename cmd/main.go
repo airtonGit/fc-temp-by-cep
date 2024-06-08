@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	internalhttp "github.com/airtongit/fc-temp-by-cep/internal/infra/http"
 	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
 	"net/http"
@@ -19,9 +20,7 @@ func main() {
 	}
 
 	r := chi.NewRouter()
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World!"))
-	})
+	r.Get("/{cep}", internalhttp.CepHandler)
 	fmt.Println("Listening on :8080")
 	err := http.ListenAndServe(":8080", r)
 	if err != nil {
