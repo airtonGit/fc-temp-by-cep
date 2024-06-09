@@ -2,12 +2,17 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"github.com/airtongit/fc-temp-by-cep/infra/http/api"
 )
 
 type CepClient interface {
 	GetLocalidade(ctx context.Context, cep string) (*api.LocalidadeResponse, error)
 }
+
+var (
+	ErrCepNotFound = fmt.Errorf("cep not found")
+)
 
 type localidadeUsecase struct {
 	cepClient CepClient
@@ -33,6 +38,10 @@ func (l *localidadeUsecase) Execute(ctx context.Context, input LocalidadeInput) 
 	localidadeOutput, err := l.cepClient.GetLocalidade(ctx, input.Cep)
 	if err != nil {
 		return LocalidadeOutput{}, err
+	}
+
+	if localidadeOutput.Erro {
+		return LocalidadeOutput{}, fmt.Errorf("can not find zipcode")
 	}
 
 	return LocalidadeOutput{

@@ -8,6 +8,7 @@ import (
 	"regexp"
 
 	"github.com/airtongit/fc-temp-by-cep/internal"
+	"github.com/airtongit/fc-temp-by-cep/internal/usecase"
 	"github.com/go-chi/chi"
 )
 
@@ -37,6 +38,13 @@ func CepHandler(ctrl TempByCep) http.HandlerFunc {
 
 		tempResponse, err := ctrl.GetTemp(r.Context(), cep)
 		if err != nil {
+
+			if errors.Is(err, usecase.ErrCepNotFound) {
+				w.WriteHeader(http.StatusNotFound)
+				w.Write([]byte(err.Error()))
+				return
+			}
+
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
 			return

@@ -35,3 +35,18 @@ func Test_viaCEPClient_Ask_Response(t *testing.T) {
 	// Then
 	assert.Equal(t, "SC", got.Uf, "Esperado SC, got=%s", got.Uf)
 }
+
+func Test_viaCEPClient_CEP_Wrong(t *testing.T) {
+
+	// given
+	v := &viaCEPClient{
+		baseURL: "http://viacep.com.br",
+	}
+
+	// When
+	got, err := v.GetLocalidade(context.TODO(), "12345678")
+	assert.NoError(t, err)
+
+	// Then
+	assert.Equal(t, "SC", got.Uf, "Esperado SC, got=%s", got.Uf)
+}

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -27,6 +28,7 @@ type LocalidadeResponse struct {
 	Unidade     string `json:"unidade"`
 	Ibge        string `json:"ibge"`
 	Gia         string `json:"gia"`
+	Erro        bool   `json:"erro"`
 }
 
 func (v *viaCEPClient) GetLocalidade(ctx context.Context, cep string) (*LocalidadeResponse, error) {
@@ -43,10 +45,15 @@ func (v *viaCEPClient) GetLocalidade(ctx context.Context, cep string) (*Localida
 	}
 	defer resp.Body.Close()
 
-	cepPayload := new(LocalidadeResponse)
-	err = json.NewDecoder(resp.Body).Decode(cepPayload)
+	respBuf := bytes.Buffer{}
+	respBuf.ReadFrom(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+	cepPayload := new(LocalidadeResponse)
+	err = json.Unmarshal(respBuf.Bytes(), cepPayload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w, full response: %s", err, respBuf.String())
 	}
 
 	return cepPayload, nil

@@ -10,7 +10,9 @@ import (
 )
 
 func TestController(t *testing.T) {
-	// test GetTemp
+	if os.Getenv("WEATHER") == "" {
+		t.Skip("skipping integration test, WEATHER environment variable not set")
+	}
 
 	cepClient := api.NewViaCEPClient("http://viacep.com.br")
 	localidadeUsecase := usecase.NewLocalidadeUsecase(cepClient)
