@@ -36,7 +36,7 @@ func Test_viaCEPClient_Ask_Response(t *testing.T) {
 	assert.Equal(t, "SC", got.Uf, "Esperado SC, got=%s", got.Uf)
 }
 
-func Test_viaCEPClient_CEP_Wrong(t *testing.T) {
+func Test_viaCEPClient_CEP_NotFound(t *testing.T) {
 
 	// given
 	v := &viaCEPClient{
@@ -48,5 +48,5 @@ func Test_viaCEPClient_CEP_Wrong(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Then
-	assert.Equal(t, "SC", got.Uf, "Esperado SC, got=%s", got.Uf)
+	assert.Equal(t, true, got.Erro, "Error is true, cep not found")
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"testing"
 
@@ -14,7 +15,7 @@ func Test_weatherClient_GetTemp(t *testing.T) {
 		t.Skip("skipping integration test, need env var WEATHER")
 	}
 
-	w, err := NewWeatherClient(os.Getenv("WEATHER"))
+	w, err := NewWeatherClient(&http.Client{}, os.Getenv("WEATHER"))
 	if err != nil {
 		t.Errorf("test need env var")
 	}

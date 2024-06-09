@@ -18,16 +18,22 @@ type weatherResponse struct {
 	} `json:"current"`
 }
 
+type HTTPClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type weatherClient struct {
+	client HTTPClient
 	apiKey string
 }
 
-func NewWeatherClient(apiKey string) (*weatherClient, error) {
+func NewWeatherClient(client HTTPClient, apiKey string) (*weatherClient, error) {
 	if apiKey == "" {
 		return nil, fmt.Errorf("error config client")
 	}
 
 	return &weatherClient{
+		client: client,
 		apiKey: apiKey,
 	}, nil
 }
@@ -44,9 +50,7 @@ func (w *weatherClient) GetTemp(ctx context.Context, q string) (GetTempOutput, e
 		return GetTempOutput{}, fmt.Errorf("fail to create request: %w", err)
 	}
 
-	client := &http.Client{}
-
-	resp, err := client.Do(req)
+	resp, err := w.client.Do(req)
 	defer resp.Body.Close()
 	if err != nil {
 		return GetTempOutput{}, fmt.Errorf("fail to do request: %w", err)

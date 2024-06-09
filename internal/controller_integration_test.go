@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"testing"
 
@@ -16,7 +17,7 @@ func TestController(t *testing.T) {
 
 	cepClient := api.NewViaCEPClient("http://viacep.com.br")
 	localidadeUsecase := usecase.NewLocalidadeUsecase(cepClient)
-	tempClient, _ := api.NewWeatherClient(os.Getenv("WEATHER"))
+	tempClient, _ := api.NewWeatherClient(&http.Client{}, os.Getenv("WEATHER"))
 	tempUsecase := usecase.NewTempUsecase(tempClient)
 	kelvinService := usecase.NewKelvinService()
 	tempByCEPctrl := NewTempByLocaleController(localidadeUsecase, tempUsecase, kelvinService)

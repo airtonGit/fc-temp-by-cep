@@ -25,7 +25,8 @@ func main() {
 
 	cepClient := api.NewViaCEPClient("http://viacep.com.br")
 	localidadeUsecase := usecase.NewLocalidadeUsecase(cepClient)
-	tempClient, err := api.NewWeatherClient(os.Getenv("WEATHER"))
+
+	tempClient, err := api.NewWeatherClient(&http.Client{}, os.Getenv("WEATHER"))
 	if err != nil {
 		fmt.Println(err)
 		return
