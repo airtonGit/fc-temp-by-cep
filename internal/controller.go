@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"github.com/airtongit/fc-temp-by-cep/internal/usecase"
 )
 
@@ -44,7 +45,7 @@ func (t *tempByLocaleController) GetTemp(ctx context.Context, cep string) (Temp,
 	}
 	localidade, err := t.localidadeUsecase.Execute(ctx, localidadeInput)
 	if err != nil {
-		return Temp{}, err
+		return Temp{}, fmt.Errorf("getting localidade by cep: %w", err)
 	}
 
 	tempUsecaseInput := usecase.TempUsecaseInput{
@@ -54,7 +55,7 @@ func (t *tempByLocaleController) GetTemp(ctx context.Context, cep string) (Temp,
 	}
 	temp, err := t.tempUsecase.Execute(ctx, tempUsecaseInput)
 	if err != nil {
-		return Temp{}, err
+		return Temp{}, fmt.Errorf("getting temp by localidade: %w", err)
 	}
 
 	kelvin := t.kelvinService.GetKelvin(temp.TempC)

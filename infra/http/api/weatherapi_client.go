@@ -8,10 +8,6 @@ import (
 	"net/url"
 )
 
-const baseUrl = "https://www.weatherapi.com/docs/#"
-
-const weatherAPIKey = "955781466c1e414e9e9181300240806"
-
 type weatherResponse struct {
 	Current struct {
 		LastUpdatedEpoch int     `json:"last_updated_epoch"`
@@ -26,10 +22,14 @@ type weatherClient struct {
 	apiKey string
 }
 
-func NewWeatherClient(apiKey string) *weatherClient {
+func NewWeatherClient(apiKey string) (*weatherClient, error) {
+	if apiKey == "" {
+		return nil, fmt.Errorf("error config client")
+	}
+
 	return &weatherClient{
 		apiKey: apiKey,
-	}
+	}, nil
 }
 
 type GetTempOutput struct {
@@ -41,21 +41,30 @@ func (w *weatherClient) GetTemp(ctx context.Context, q string) (GetTempOutput, e
 	urlBase := fmt.Sprintf("http://api.weatherapi.com/v1/current.json?key=%s&q=%s&aqi=no", w.apiKey, url.QueryEscape(q))
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, urlBase, nil)
 	if err != nil {
-		return GetTempOutput{}, err
+		return GetTempOutput{}, fmt.Errorf("fail to create request: %w", err)
 	}
 
 	client := &http.Client{}
 
 	resp, err := client.Do(req)
+	defer resp.Body.Close()
 	if err != nil {
-		return GetTempOutput{}, err
+		return GetTempOutput{}, fmt.Errorf("fail to do request: %w", err)
 	}
 
 	respPayload := &weatherResponse{}
-	err = json.NewDecoder(resp.Body).Decode(respPayload)
+
+	respBuf := make([]byte, 1024)
+	_, err = resp.Body.Read(respBuf)
 	if err != nil {
-		return GetTempOutput{}, err
+		return GetTempOutput{}, fmt.Errorf("fail to load response: %w", err)
 	}
+
+	err = json.Unmarshal(respBuf, respPayload)
+	if err != nil {
+		return GetTempOutput{}, fmt.Errorf("fail to decode response: %w, full response: %s", err, string(respBuf))
+	}
+
 	return GetTempOutput{
 		TempC: respPayload.Current.TempC,
 		TempF: respPayload.Current.TempF,
