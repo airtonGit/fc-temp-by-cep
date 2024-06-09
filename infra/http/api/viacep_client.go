@@ -1,4 +1,4 @@
-package http
+package api
 
 import (
 	"context"
@@ -7,13 +7,17 @@ import (
 	"net/http"
 )
 
-const baseURL = "http://viacep.com.br"
-
 type viaCEPClient struct {
 	baseURL string
 }
 
-type CepResponse struct {
+func NewViaCEPClient(baseURL string) *viaCEPClient {
+	return &viaCEPClient{
+		baseURL: baseURL,
+	}
+}
+
+type LocalidadeResponse struct {
 	Cep         string `json:"cep"`
 	Logradouro  string `json:"logradouro"`
 	Complemento string `json:"complemento"`
@@ -25,15 +29,21 @@ type CepResponse struct {
 	Gia         string `json:"gia"`
 }
 
-func (v *viaCEPClient) Ask(ctx context.Context, cep string) (*CepResponse, error) {
+func (v *viaCEPClient) GetLocalidade(ctx context.Context, cep string) (*LocalidadeResponse, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/ws/%s/json", v.baseURL, cep), nil)
-
 	if err != nil {
 		return nil, err
 	}
 
-	var cepPayload *CepResponse
-	err = json.NewDecoder(req.Body).Decode(cepPayload)
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	cepPayload := new(LocalidadeResponse)
+	err = json.NewDecoder(resp.Body).Decode(cepPayload)
 	if err != nil {
 		return nil, err
 	}
