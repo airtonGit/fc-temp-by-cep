@@ -25,7 +25,7 @@ func main() {
 
 	cepClient := api.NewViaCEPClient("http://viacep.com.br")
 	localidadeUsecase := usecase.NewLocalidadeUsecase(cepClient)
-	tempClient := api.NewWeatherClient(os.Getenv("WEATHER_API_KEY"))
+	tempClient := api.NewWeatherClient(os.Getenv("WEATHER"))
 	tempUsecase := usecase.NewTempUsecase(tempClient)
 	kelvinService := usecase.NewKelvinService()
 	tempByCEPctrl := internal.NewTempByLocaleController(localidadeUsecase, tempUsecase, kelvinService)

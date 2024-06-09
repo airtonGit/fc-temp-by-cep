@@ -12,6 +12,8 @@ services:
 
   rate-limiter:
     image: ratelimiter:latest
+    environment:
+      WEATHER: 955781466c1e414e9e9181300240806
     build:
       context: .
       dockerfile: ./Dockerfile
