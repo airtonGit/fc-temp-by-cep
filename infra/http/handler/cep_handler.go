@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"regexp"
 
@@ -17,11 +18,12 @@ type TempByCep interface {
 }
 
 func validate(cep string) error {
-	matched, err := regexp.MatchString(`ˆ\d{8}`, cep)
+	matched, err := regexp.MatchString(`\d{8}`, cep)
 	if err != nil {
 		return err
 	}
 	if !matched {
+		log.Println("matchstring not match with", cep)
 		return errors.New("invalid zipcode")
 	}
 	return nil

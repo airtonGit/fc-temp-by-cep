@@ -42,8 +42,8 @@ func main() {
 	})
 	r.Get("/cep/{cep}", handler.CepHandler(tempByCEPctrl))
 
-	fmt.Println("Listening on :80")
-	err = http.ListenAndServe(":80", r)
+	fmt.Println("Listening on :8080")
+	err = http.ListenAndServe(":8080", r)
 	if err != nil {
 		fmt.Println(err)
 		return
