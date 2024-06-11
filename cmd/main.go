@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -42,10 +43,17 @@ func main() {
 	})
 	r.Get("/cep/{cep}", handler.CepHandler(tempByCEPctrl))
 
-	fmt.Println("Listening on :8080")
-	err = http.ListenAndServe(":8080", r)
-	if err != nil {
-		fmt.Println(err)
-		return
+	// Determine port for HTTP service.
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("defaulting to port %s", port)
 	}
+
+	// Start HTTP server.
+	log.Printf("listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, r); err != nil {
+		log.Fatal(err)
+	}
+
 }
