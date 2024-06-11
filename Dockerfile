@@ -23,7 +23,7 @@ COPY . ./
 RUN go build -v -o /app/temp-cep cmd/main.go
 
 # Now create separate deployment image
-FROM gcr.io/distroless/static-debian11
+FROM scratch
 
 # Definition of this variable is used by 'skaffold debug' to identify a golang binary.
 # Default behavior - a failure prints a stack trace for the current goroutine.

@@ -31,6 +31,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+
 	tempUsecase := usecase.NewTempUsecase(tempClient)
 	kelvinService := usecase.NewKelvinService()
 	tempByCEPctrl := internal.NewTempByLocaleController(localidadeUsecase, tempUsecase, kelvinService)
@@ -38,8 +39,8 @@ func main() {
 	r := chi.NewRouter()
 	r.Get("/{cep}", handler.CepHandler(tempByCEPctrl))
 
-	fmt.Println("Listening on :8080")
-	err = http.ListenAndServe(":8080", r)
+	fmt.Println("Listening on :80")
+	err = http.ListenAndServe(":80", r)
 	if err != nil {
 		fmt.Println(err)
 		return
