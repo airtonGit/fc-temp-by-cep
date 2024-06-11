@@ -37,7 +37,10 @@ func main() {
 	tempByCEPctrl := internal.NewTempByLocaleController(localidadeUsecase, tempUsecase, kelvinService)
 
 	r := chi.NewRouter()
-	r.Get("/{cep}", handler.CepHandler(tempByCEPctrl))
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("temp by cep ready at /cep/{cep}"))
+	})
+	r.Get("/cep/{cep}", handler.CepHandler(tempByCEPctrl))
 
 	fmt.Println("Listening on :80")
 	err = http.ListenAndServe(":80", r)
