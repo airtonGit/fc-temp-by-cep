@@ -1,0 +1,17 @@
+
+services:
+  temp-by-cep:
+    image: ghcr.io/airtongit/fc-temp-by-cep:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    networks:
+      - net1
+
+networks:
+  net1:
+    driver: bridge
