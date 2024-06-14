@@ -41,7 +41,7 @@ func main() {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("temp by cep ready at /cep/{cep}"))
 	})
-	r.Get("/cep/{cep}", handler.CepHandler(tempByCEPctrl))
+	r.Get("/cep/{cep}", handler.MakeCepHandler(tempByCEPctrl))
 
 	// Determine port for HTTP service.
 	port := os.Getenv("PORT")

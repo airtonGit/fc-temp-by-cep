@@ -29,7 +29,7 @@ func validate(cep string) error {
 	return nil
 }
 
-func CepHandler(ctrl TempByCep) http.HandlerFunc {
+func MakeCepHandler(ctrl TempByCep) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cep := chi.URLParam(r, "cep")
 		if err := validate(cep); err != nil {
