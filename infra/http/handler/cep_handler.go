@@ -10,7 +10,7 @@ import (
 
 	"github.com/airtongit/fc-temp-by-cep/internal"
 	"github.com/airtongit/fc-temp-by-cep/internal/usecase"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 type TempByCep interface {
@@ -18,7 +18,8 @@ type TempByCep interface {
 }
 
 func validate(cep string) error {
-	matched, err := regexp.MatchString(`\d{8}`, cep)
+	log.Println("validate CEP", cep)
+	matched, err := regexp.MatchString(`^\d{8}$`, cep)
 	if err != nil {
 		return err
 	}
@@ -31,6 +32,7 @@ func validate(cep string) error {
 
 func MakeCepHandler(ctrl TempByCep) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		cep := chi.URLParam(r, "cep")
 		if err := validate(cep); err != nil {
 			w.WriteHeader(http.StatusUnprocessableEntity)

@@ -10,7 +10,7 @@ import (
 	"github.com/airtongit/fc-temp-by-cep/infra/http/handler"
 	"github.com/airtongit/fc-temp-by-cep/internal"
 	"github.com/airtongit/fc-temp-by-cep/internal/usecase"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 )
 
