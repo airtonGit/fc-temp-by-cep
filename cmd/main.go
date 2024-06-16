@@ -68,6 +68,30 @@ func initProvider(serviceName, collectorURL string) (func(context.Context) error
 	return tracerProvider.Shutdown, nil
 }
 
+type config struct {
+	OtelServiceName      string
+	OtelExporterEndpoing string
+}
+
+func loadConfig() (config, error) {
+
+	viper.AutomaticEnv()
+
+	cfg := config{
+		OtelServiceName:      viper.GetString("OTEL_SERVICE_NAME"),
+		OtelExporterEndpoing: viper.GetString("OTEL_EXPORTER_OTLP_ENDPOINT"),
+	}
+
+	if cfg.OtelServiceName == "" {
+		return config{}, fmt.Errorf("otel service name empty")
+	}
+
+	if cfg.OtelExporterEndpoing == "" {
+		return config{}, fmt.Errorf("otel endpoint empty")
+	}
+	return cfg, nil
+}
+
 func main() {
 
 	sigCh := make(chan os.Signal, 1)
@@ -84,7 +108,12 @@ func main() {
 		}
 	}
 
-	shutdown, err := initProvider(viper.GetString("OTEL_SERVICE_NAME"), viper.GetString("OTEL_EXPORTER_OTLP_ENDPOINT"))
+	cfg, err := loadConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	shutdown, err := initProvider(cfg.OtelServiceName, cfg.OtelExporterEndpoing)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -93,9 +122,6 @@ func main() {
 			log.Fatal("failed to shutdown TracerProvider: %w", err)
 		}
 	}()
-
-	//embedded.Tracer
-	//Start(ctx context.Context, spanName string, opts ...SpanStartOption) (context.Context, Span)Span
 
 	tracer := otel.Tracer("temp-by-cep-otel-tracer")
 	tracerAdapter := internal.NewTracerAdapter(tracer)
