@@ -71,9 +71,10 @@ func NewTempByLocaleController(tracer TraceAdapter, localidadeUsecase Localidade
 }
 
 type Temp struct {
-	TempC float64 `json:"temp_C,omitempty"`
-	TempF float64 `json:"temp_F,omitempty"`
-	TempK float64 `json:"temp_K,omitempty"`
+	TempC      float64 `json:"temp_C,omitempty"`
+	TempF      float64 `json:"temp_F,omitempty"`
+	TempK      float64 `json:"temp_K,omitempty"`
+	Localidade string  `json:"localidade"`
 }
 
 func (t *tempByLocaleController) GetTemp(ctx context.Context, cep string) (Temp, error) {
@@ -111,8 +112,9 @@ func (t *tempByLocaleController) GetTemp(ctx context.Context, cep string) (Temp,
 	kelvin := t.kelvinService.GetKelvin(temp.TempC)
 
 	return Temp{
-		TempC: temp.TempC,
-		TempF: temp.TempF,
-		TempK: kelvin,
+		TempC:      temp.TempC,
+		TempF:      temp.TempF,
+		TempK:      kelvin,
+		Localidade: fmt.Sprintf("%s %s", localidade.Localidade, localidade.Uf),
 	}, nil
 }
