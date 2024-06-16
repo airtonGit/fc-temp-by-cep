@@ -20,7 +20,7 @@ func TestController(t *testing.T) {
 	tempClient, _ := api.NewWeatherClient(&http.Client{}, os.Getenv("WEATHER"))
 	tempUsecase := usecase.NewTempUsecase(tempClient)
 	kelvinService := usecase.NewKelvinService()
-	tempByCEPctrl := NewTempByLocaleController(localidadeUsecase, tempUsecase, kelvinService)
+	tempByCEPctrl := NewTempByLocaleController(nil, localidadeUsecase, tempUsecase, kelvinService)
 
 	temp, err := tempByCEPctrl.GetTemp(context.Background(), "88955-000")
 	if err != nil {

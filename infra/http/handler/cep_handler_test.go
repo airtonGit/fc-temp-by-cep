@@ -4,7 +4,6 @@ package handler
 import (
 	"context"
 	"fmt"
-	"github.com/go-chi/chi/v5"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -13,7 +12,28 @@ import (
 	"github.com/airtongit/fc-temp-by-cep/infra/http/api"
 	"github.com/airtongit/fc-temp-by-cep/internal"
 	"github.com/airtongit/fc-temp-by-cep/internal/usecase"
+	"github.com/go-chi/chi/v5"
+	"github.com/stretchr/testify/mock"
+	"go.opentelemetry.io/otel/trace"
 )
+
+type traceSpan struct {
+	mock.Mock
+}
+
+func (t *traceSpan) End(options ...trace.SpanEndOption) {
+	t.Called()
+}
+
+type tracerMock struct {
+	mock.Mock
+	span *traceSpan
+}
+
+func (t *tracerMock) Start(ctx context.Context, spanName string, opts ...trace.SpanStartOption) (context.Context, internal.TraceSpan) {
+	t.Called(ctx, spanName, opts)
+	return context.TODO(), t.span
+}
 
 func TestHealthCepHandlerInvalidCEP(t *testing.T) {
 
@@ -28,9 +48,12 @@ func TestHealthCepHandlerInvalidCEP(t *testing.T) {
 		return
 	}
 
+	myTracerMock := new(tracerMock)
+	myTracerMock.On("Start", mock.Anything, mock.AnythingOfType("string")).Return()
+
 	tempUsecase := usecase.NewTempUsecase(tempClient)
 	kelvinService := usecase.NewKelvinService()
-	tempByCEPctrl := internal.NewTempByLocaleController(localidadeUsecase, tempUsecase, kelvinService)
+	tempByCEPctrl := internal.NewTempByLocaleController(myTracerMock, localidadeUsecase, tempUsecase, kelvinService)
 
 	// Create a request to pass to our handler. We don't have any query parameters for now, so we'll
 	// pass 'nil' as the third parameter.
@@ -59,13 +82,6 @@ func TestHealthCepHandlerInvalidCEP(t *testing.T) {
 	}
 }
 
-func WithUrlParam(r *http.Request, key, value string) *http.Request {
-	chiCtx := chi.NewRouteContext()
-	req := r.WithContext(context.WithValue(r.Context(), chi.RouteCtxKey, chiCtx))
-	chiCtx.URLParams.Add(key, value)
-	return req
-}
-
 func TestHealthCepHandlerValidCEP(t *testing.T) {
 
 	cepClient := api.NewViaCEPClient("http://viacep.com.br")
@@ -78,9 +94,17 @@ func TestHealthCepHandlerValidCEP(t *testing.T) {
 		return
 	}
 
+	mySpan := new(traceSpan)
+	mySpan.On("End").Return()
+
+	myTracerMock := &tracerMock{
+		span: mySpan,
+	}
+	myTracerMock.On("Start", mock.Anything, mock.Anything, mock.Anything).Times(3).Return()
+
 	tempUsecase := usecase.NewTempUsecase(tempClient)
 	kelvinService := usecase.NewKelvinService()
-	tempByCEPctrl := internal.NewTempByLocaleController(localidadeUsecase, tempUsecase, kelvinService)
+	tempByCEPctrl := internal.NewTempByLocaleController(myTracerMock, localidadeUsecase, tempUsecase, kelvinService)
 
 	// Create a request to pass to our handler. We don't have any query parameters for now, so we'll
 	// pass 'nil' as the third parameter.
