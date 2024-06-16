@@ -40,7 +40,7 @@ func initProvider(serviceName, collectorURL string) (func(context.Context) error
 		return nil, fmt.Errorf("failed to create resource: %w", err)
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*2)
 	defer cancel()
 	conn, err := grpc.DialContext(ctx, collectorURL,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -123,7 +123,7 @@ func main() {
 		}
 	}()
 
-	tracer := otel.Tracer("temp-by-cep-otel-tracer")
+	tracer := otel.Tracer("temp-by-cep-service-b")
 	tracerAdapter := internal.NewTracerAdapter(tracer)
 
 	cepClient := api.NewViaCEPClient("http://viacep.com.br")
