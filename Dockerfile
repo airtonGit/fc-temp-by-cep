@@ -25,6 +25,8 @@ RUN go build -v -o /app/temp-cep cmd/main.go
 # Now create separate deployment image
 FROM scratch
 
+LABEL org.opencontainers.image.source=https://github.com/airtongit/fc-temp-by-cep
+
 # Definition of this variable is used by 'skaffold debug' to identify a golang binary.
 # Default behavior - a failure prints a stack trace for the current goroutine.
 # See https://golang.org/pkg/runtime/
