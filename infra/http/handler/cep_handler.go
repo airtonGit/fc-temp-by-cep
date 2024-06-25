@@ -32,17 +32,17 @@ func validate(cep string) error {
 
 func MakeCepHandler(ctrl TempByCep) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
+		log.Println("handling req")
 		cep := chi.URLParam(r, "cep")
 		if err := validate(cep); err != nil {
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			w.Write([]byte(err.Error()))
 			return
 		}
-
+		log.Println("cep", cep)
 		tempResponse, err := ctrl.GetTemp(r.Context(), cep)
 		if err != nil {
-
+			log.Println("get_temp err", err)
 			if errors.Is(err, usecase.ErrCepNotFound) {
 				w.WriteHeader(http.StatusNotFound)
 				w.Write([]byte(err.Error()))
