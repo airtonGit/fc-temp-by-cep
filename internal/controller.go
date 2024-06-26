@@ -2,7 +2,6 @@ package internal
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/airtongit/fc-temp-by-cep/internal/usecase"
 	"go.opentelemetry.io/otel/trace"
@@ -93,9 +92,9 @@ func (t *tempByLocaleController) GetTemp(ctx context.Context, cep string) (Temp,
 
 	localidade, err := t.localidadeUsecase.Execute(ctx, localidadeInput)
 	if err != nil {
-		if errors.Is(err, usecase.ErrCepNotFound) {
+		if err.Error() == usecase.ErrCepNotFound.Error() {
 			log.Println("ctrl error ir err_cep_not_found")
-			return Temp{}, err
+			return Temp{}, usecase.ErrCepNotFound
 		}
 		return Temp{}, fmt.Errorf("getting localidade by cep: %w", err)
 	}
