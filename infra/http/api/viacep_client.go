@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -51,8 +52,25 @@ func (v *viaCEPClient) GetLocalidade(ctx context.Context, cep string) (*Localida
 		return nil, fmt.Errorf("failed to read response: %w", err)
 	}
 	cepPayload := new(LocalidadeResponse)
+
+	// first try to get some error
+	type errorResponse struct {
+		Erro string `json:"erro"`
+	}
+	errResp := new(errorResponse)
+	err = json.Unmarshal(respBuf.Bytes(), errResp)
+	if err != nil {
+		log.Println("err status:", resp.Status)
+		return nil, fmt.Errorf("failed to decode response: %w, full response: %s", err, respBuf.String())
+	}
+	if errResp.Erro == "true" {
+		cepPayload.Erro = true
+		return cepPayload, fmt.Errorf("cep not found")
+	}
+
 	err = json.Unmarshal(respBuf.Bytes(), cepPayload)
 	if err != nil {
+		log.Println("err status:", resp.Status)
 		return nil, fmt.Errorf("failed to decode response: %w, full response: %s", err, respBuf.String())
 	}
 

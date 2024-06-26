@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/airtongit/fc-temp-by-cep/infra/http/api"
 )
@@ -37,6 +38,9 @@ func NewLocalidadeUsecase(cepClient CepClient) *localidadeUsecase {
 func (l *localidadeUsecase) Execute(ctx context.Context, input LocalidadeInput) (LocalidadeOutput, error) {
 	localidadeOutput, err := l.cepClient.GetLocalidade(ctx, input.Cep)
 	if err != nil {
+		if errors.Is(err, ErrCepNotFound) {
+			return LocalidadeOutput{}, ErrCepNotFound
+		}
 		return LocalidadeOutput{}, err
 	}
 

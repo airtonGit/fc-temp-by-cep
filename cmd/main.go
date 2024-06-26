@@ -141,7 +141,7 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("temp by cep ready at /cep/{cep}"))
+		w.Write([]byte("service-b listening, READY"))
 	})
 	r.Get("/cep/{cep}", handler.MakeCepHandler(tempByCEPctrl))
 
@@ -153,7 +153,7 @@ func main() {
 	}
 
 	// Start HTTP server.
-	log.Printf("listening on port %s", port)
+	log.Printf("service-b listening on port %s", port)
 	if err := http.ListenAndServe(":"+port, r); err != nil {
 		log.Fatal(err)
 	}

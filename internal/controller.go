@@ -2,11 +2,11 @@ package internal
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"time"
-
 	"github.com/airtongit/fc-temp-by-cep/internal/usecase"
 	"go.opentelemetry.io/otel/trace"
+	"log"
 )
 
 type LocalidadeUsecase interface {
@@ -79,9 +79,8 @@ type Temp struct {
 
 func (t *tempByLocaleController) GetTemp(ctx context.Context, cep string) (Temp, error) {
 
-	ctx, spanInicial := t.OTELTracer.Start(ctx, "SPAN_INICIAL_fc-temp-by-cep-app")
-	time.Sleep(time.Second)
-	spanInicial.End()
+	ctx, spanInicial := t.OTELTracer.Start(ctx, "get_temp_by_cep full")
+	defer spanInicial.End()
 
 	ctx, spanLocalidade := t.OTELTracer.Start(ctx, "Chama externa get localidade by CEP")
 	defer spanLocalidade.End()
@@ -89,8 +88,15 @@ func (t *tempByLocaleController) GetTemp(ctx context.Context, cep string) (Temp,
 	localidadeInput := usecase.LocalidadeInput{
 		Cep: cep,
 	}
+
+	log.Println("localidade_usecase_exec", localidadeInput)
+
 	localidade, err := t.localidadeUsecase.Execute(ctx, localidadeInput)
 	if err != nil {
+		if errors.Is(err, usecase.ErrCepNotFound) {
+			log.Println("ctrl error ir err_cep_not_found")
+			return Temp{}, err
+		}
 		return Temp{}, fmt.Errorf("getting localidade by cep: %w", err)
 	}
 
@@ -102,8 +108,10 @@ func (t *tempByLocaleController) GetTemp(ctx context.Context, cep string) (Temp,
 
 	spanLocalidade.End()
 
-	ctx, spanTemperatura := t.OTELTracer.Start(ctx, "Chama externa get temperatura by CEP")
+	ctx, spanTemperatura := t.OTELTracer.Start(ctx, "Chama externa: temperatura by CEP")
 	defer spanTemperatura.End()
+
+	log.Println("temperature_usecase_exec", localidadeInput)
 	temp, err := t.tempUsecase.Execute(ctx, tempUsecaseInput)
 	if err != nil {
 		return Temp{}, fmt.Errorf("getting temp by localidade: %w", err)

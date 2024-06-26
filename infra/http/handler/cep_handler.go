@@ -11,6 +11,8 @@ import (
 	"github.com/airtongit/fc-temp-by-cep/internal"
 	"github.com/airtongit/fc-temp-by-cep/internal/usecase"
 	"github.com/go-chi/chi/v5"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 type TempByCep interface {
@@ -40,7 +42,11 @@ func MakeCepHandler(ctrl TempByCep) http.HandlerFunc {
 			return
 		}
 		log.Println("cep", cep)
-		tempResponse, err := ctrl.GetTemp(r.Context(), cep)
+		carrier := propagation.HeaderCarrier(r.Header)
+		ctx := r.Context()
+		ctx = otel.GetTextMapPropagator().Extract(ctx, carrier)
+
+		tempResponse, err := ctrl.GetTemp(ctx, cep)
 		if err != nil {
 			log.Println("get_temp err", err)
 			if errors.Is(err, usecase.ErrCepNotFound) {
